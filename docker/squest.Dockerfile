@@ -66,7 +66,11 @@ RUN chown -R ${APP_USER}:${APP_USER} /app
 
 # Change to a non-root user
 USER ${APP_USER}:${APP_USER}
-WORKDIR /app
+WORKDIR /app 
+
+RUN pip install --upgrade pip
+
+RUN pip install -r requirements.txt
 
 # Default entry point
 CMD ["/app/docker/entrypoint.sh"]

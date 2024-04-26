@@ -33,7 +33,7 @@ class Instance(SquestModel):
         default_permissions = ('add', 'change', 'delete', 'view', 'list')
 
 
-    name = CharField(verbose_name="Instance name", max_length=100)
+    name = CharField(verbose_name="Instance Identifier", max_length=100)
     spec = JSONField(default=dict, blank=True, verbose_name="Admin spec")
     user_spec = JSONField(default=dict, blank=True, verbose_name="User spec")
     service = ForeignKey(Service, blank=True, null=True, on_delete=CASCADE)
@@ -43,7 +43,8 @@ class Instance(SquestModel):
         Scope,
         related_name="quota_instances",
         related_query_name="quota_instance",
-        on_delete=PROTECT
+        on_delete=PROTECT,
+        verbose_name="Domain Selection"
     )
     state = FSMIntegerField(default=InstanceState.PENDING, choices=InstanceState.choices)
     date_available = DateTimeField(null=True, blank=True)

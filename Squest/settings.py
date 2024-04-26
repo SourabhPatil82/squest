@@ -24,7 +24,7 @@ from service_catalog.utils import str_to_bool, get_mysql_dump_major_version, \
 SECRET_KEY = os.environ.get('SECRET_KEY', 'sxuxahnezvrrea2vp97et=q(3xmg6nk4on92+-+#_s!ikurbh-')
 DEBUG = str_to_bool(os.getenv('DEBUG', True))
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1:8080,http://localhost:8080').split(',')
+CSRF_TRUSTED_ORIGINS = ['http://10.25.54.12:8080', 'http://localhost:8080' , 'http://squest.domain.local', 'http://squest.domain.local:8080']
 DB_DATABASE = os.environ.get('DB_DATABASE', 'squest_db')
 DB_USER = os.environ.get('DB_USER', 'squest_user')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'squest_password')
@@ -458,13 +458,13 @@ if BACKUP_ENABLED:
 # -----------------------------------------
 # SQUEST VERSION
 # -----------------------------------------
-try:
-    repo = git.Repo(search_parent_directories=True)
-    SQUEST_COMMIT_SHA6 = str(repo.head.object.hexsha)[0:6]
-except git.exc.InvalidGitRepositoryError:
-    SQUEST_COMMIT_SHA6 = "local dev"
-print(f"SQUEST_VERSION: {__version__} - {SQUEST_COMMIT_SHA6}")
-
+# try:
+#     repo = git.Repo(search_parent_directories=True)
+#     SQUEST_COMMIT_SHA6 = str(repo.head.object.hexsha)[0:6]
+# except git.exc.InvalidGitRepositoryError:
+#     SQUEST_COMMIT_SHA6 = "local dev"
+# print(f"SQUEST_VERSION: {__version__} - {SQUEST_COMMIT_SHA6}")
+SQUEST_COMMIT_SHA6 = "local dev"
 # -----------------------------------------
 # Metrics
 # -----------------------------------------
@@ -515,7 +515,7 @@ SWAGGER_SETTINGS = {
             'in': 'header',
             'bearerFormat': 'Bearer',
             'scheme': 'bearer'
-        }
+        } 
     }
 }
 
