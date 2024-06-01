@@ -21,7 +21,7 @@ class RequestFilterGeneric(SquestFilter):
         widget=SelectMultiple(attrs={'data-live-search': "true"}))
 
     instance__quota_scope = ModelMultipleChoiceFilter(
-        label="Quota scope",
+        label="Tenant",
         queryset=Scope.objects.all(),
         widget=SelectMultiple(attrs={'data-live-search': "true"}))
 

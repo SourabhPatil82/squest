@@ -8,7 +8,7 @@ from service_catalog.models import Instance
 class InstanceTable(SquestTable):
     selection = CheckBoxColumn(accessor='pk', attrs={"th__input": {"onclick": "toggle(this)"}})
     id = LinkColumn()
-    quota_scope__name = Column(verbose_name='Quota scope')
+    quota_scope__name = Column(verbose_name='Tenant')
     name = LinkColumn(verbose_name="Name")
     service__name = Column(verbose_name="Service")
     date_available = TemplateColumn(template_name='generics/custom_columns/generic_date_format.html')

@@ -44,7 +44,7 @@ class Instance(SquestModel):
         related_name="quota_instances",
         related_query_name="quota_instance",
         on_delete=PROTECT,
-        verbose_name="Domain Selection"
+        verbose_name="Tenant Selection"
     )
     state = FSMIntegerField(default=InstanceState.PENDING, choices=InstanceState.choices)
     date_available = DateTimeField(null=True, blank=True)

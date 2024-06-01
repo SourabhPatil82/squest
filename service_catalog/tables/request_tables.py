@@ -13,7 +13,7 @@ class RequestTable(SquestTable):
     date_submitted = TemplateColumn(template_name='generics/custom_columns/generic_date_format.html')
     instance = LinkColumn()
     last_updated = TemplateColumn(template_name='generics/custom_columns/generic_date_format.html')
-    instance__quota_scope__name = Column(verbose_name="Quota scope")
+    instance__quota_scope__name = Column(verbose_name="Tenant")
 
     def before_render(self, request):
         if not request.user.has_perm('service_catalog.delete_request'):
@@ -63,7 +63,7 @@ class RequestTableWaitingForActions(SquestTable):
     id = Column(linkify=True, verbose_name="Request", orderable=False)
     user__username = Column(orderable=False)
     instance = LinkColumn(orderable=False)
-    instance__quota_scope__name = Column(verbose_name="Quota scope", orderable=False)
+    instance__quota_scope__name = Column(verbose_name="Tenant", orderable=False)
     review = Column(empty_values=(), orderable=False)
     operation = Column(orderable=False)
     state = Column(orderable=False)
