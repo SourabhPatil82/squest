@@ -12,6 +12,7 @@ from django_fsm import transition, FSMIntegerField
 from Squest.utils.ansible_when import AnsibleWhen
 from Squest.utils.squest_model import SquestModel
 from profiles.models.scope import Scope
+from service_catalog.models import RequestState, OperationType
 from service_catalog.models.hooks import HookManager
 from service_catalog.models.instance_state import InstanceState
 from service_catalog.models.services import Service
@@ -29,6 +30,8 @@ class Instance(SquestModel):
             ("admin_request_on_instance", "Can request an admin day2 operation on instance"),
             ("view_admin_spec_instance", "Can view admin spec on instance"),
             ("change_admin_spec_instance", "Can change admin spec on instance"),
+            ("rename_instance", "Can rename instance"),
+            ("change_requester_on_instance", "Can change owner of the instance"),
         ]
         default_permissions = ('add', 'change', 'delete', 'view', 'list')
 
@@ -211,6 +214,10 @@ class Instance(SquestModel):
                 HookManager.trigger_hook(sender=sender, instance=instance, name="on_change_instance", source=previous.state, target=instance.state,
                                          *args, **kwargs)
 
+    @property
+    def has_pending_delete_request(self):
+        return self.request_set.filter(state__in=[RequestState.SUBMITTED, RequestState.ACCEPTED],
+                                       operation__type=OperationType.DELETE).exists()
 
 
 pre_save.connect(Instance.on_change, sender=Instance)

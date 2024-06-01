@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -6,13 +8,14 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django_fsm import can_proceed
-from Squest.utils.squest_table import SquestRequestConfig
 from jinja2 import UndefinedError, TemplateError
 
+from Squest.utils.squest_table import SquestRequestConfig
 from Squest.utils.squest_views import SquestListView, SquestDetailView, SquestUpdateView, SquestDeleteView, \
     SquestPermissionDenied
 from service_catalog.filters.instance_filter import InstanceFilter, InstanceArchivedFilter
-from service_catalog.forms import InstanceForm, OperationRequestForm, SupportRequestForm, SupportMessageForm
+from service_catalog.forms import InstanceForm, OperationRequestForm, SupportRequestForm, SupportMessageForm, \
+    InstanceFormRestricted
 from service_catalog.models.documentation import Doc
 from service_catalog.models.instance import Instance
 from service_catalog.models.instance_state import InstanceState
@@ -24,8 +27,6 @@ from service_catalog.tables.instance_tables import InstanceTable
 from service_catalog.tables.operation_tables import OperationTableFromInstanceDetails
 from service_catalog.tables.request_tables import RequestTable
 from service_catalog.tables.support_tables import SupportTable
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +148,31 @@ class InstanceDetailView(SquestDetailView):
 
 class InstanceEditView(SquestUpdateView):
     model = Instance
-    form_class = InstanceForm
+    form_class = None
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'user': self.request.user})
+        return kwargs
+
+    def has_permission(self):
+        try:
+            obj = self.get_object()
+        except AttributeError:
+            obj = None
+        if self.request.user.has_perm("service_catalog.change_instance", obj) or \
+                self.request.user.has_perm("service_catalog.rename_instance", obj) or \
+                self.request.user.has_perm("service_catalog.change_owner_instance", obj):
+            return True
+        return False
+
+    def get_form_class(self):
+        if self.request.user.has_perm("service_catalog.change_instance", self.object):
+            return InstanceForm
+        elif (self.request.user.has_perm("service_catalog.rename_instance", self.object) or
+              self.request.user.has_perm("service_catalog.change_owner_instance", self.object)):
+            return InstanceFormRestricted
+        return None
 
 
 class InstanceDeleteView(SquestDeleteView):
@@ -172,6 +197,9 @@ def instance_request_new_operation(request, instance_id, operation_id):
         raise PermissionDenied("Operation service and instance service doesn't match")
     if operation.type not in [OperationType.UPDATE, OperationType.DELETE]:
         raise PermissionDenied("Operation type UPDATE and DELETE only")
+    # do not allow to ask for a deletion if delete request already there
+    if instance.has_pending_delete_request:
+        raise PermissionDenied("A deletion request has already been submitted for this instance")
 
     parameters = {
         'operation': operation,
